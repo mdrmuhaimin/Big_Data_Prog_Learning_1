@@ -4,7 +4,10 @@
  
 import java.io.IOException;
 import java.util.StringTokenizer;
- 
+
+import java.util.Locale;
+import java.text.BreakIterator;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
@@ -31,11 +34,18 @@ public class WordCountImproved extends Configured implements Tool {
         @Override
         public void map(LongWritable key, Text value, Context context
                 ) throws IOException, InterruptedException {
-            StringTokenizer itr = new StringTokenizer(value.toString());
-            while (itr.hasMoreTokens()) {
-                word.set(itr.nextToken());
-                context.write(word, one);
-            }
+        	Locale locale = new Locale("en", "ca");
+        	BreakIterator breakiter = BreakIterator.getWordInstance(locale);
+        	int start = breakiter.first();
+        	String line = value.toString();
+        	breakiter.setText(line);
+        	for (int end = breakiter.next(); end != BreakIterator.DONE; start = end, end = breakiter.next()) {
+        		String brokenWord = line.substring(start,end).trim().toLowerCase(locale);
+        		if(brokenWord.length() > 0) {
+        			word.set(brokenWord);
+        	    	context.write(word, one);
+        		}
+        	}
         }
     }
  

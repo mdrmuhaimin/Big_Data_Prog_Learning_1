@@ -3,7 +3,9 @@ rm -rf wordcount-1
 rm -rf wordcount-2
 
 wget http://cmpt732.csil.sfu.ca/datasets/wordcount-2.zip
+wget http://cmpt732.csil.sfu.ca/datasets/wordcount-1.zip
 unzip wordcount-2.zip
+unzip wordcount-1.zip
 
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 export HADOOP_HOME=/usr/shared/CMPT/big-data/hadoop-2.6.0
