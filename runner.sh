@@ -1,6 +1,5 @@
-rm -rf output
-rm -rf wordcount-1
-rm -rf wordcount-2
+rm -rf output-*
+rm -rf wordcount-*
 
 wget http://cmpt732.csil.sfu.ca/datasets/wordcount-2.zip
 wget http://cmpt732.csil.sfu.ca/datasets/wordcount-1.zip
@@ -18,4 +17,7 @@ ${HADOOP_HOME}/bin/yarn jar wordcountimproved.jar WordCountImproved wordcount-2 
 
 head output-1/part-r-00000
 head output-2/part-r-00000
+
+cat output-1/part-* | tail -n 15
+
 

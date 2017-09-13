@@ -4,6 +4,8 @@
  
 import java.io.IOException;
 import java.util.StringTokenizer;
+import java.lang.Object;
+import java.text.Normalizer;
 
 import java.util.Locale;
 import java.text.BreakIterator;
@@ -38,7 +40,8 @@ public class WordCountImproved extends Configured implements Tool {
         	BreakIterator breakiter = BreakIterator.getWordInstance(locale);
         	int start = breakiter.first();
         	String line = value.toString();
-        	breakiter.setText(line);
+        	line = Normalizer.normalize(line, Normalizer.Form.NFD);
+			breakiter.setText(line);
         	for (int end = breakiter.next(); end != BreakIterator.DONE; start = end, end = breakiter.next()) {
         		String brokenWord = line.substring(start,end).trim().toLowerCase(locale);
         		if(brokenWord.length() > 0) {
@@ -48,25 +51,6 @@ public class WordCountImproved extends Configured implements Tool {
         	}
         }
     }
- 
-    /* Commented for removal
-    public static class IntSumReducer
-    extends Reducer<Text, IntWritable, Text, IntWritable> {
-        private IntWritable result = new IntWritable();
- 
-        @Override
-        public void reduce(Text key, Iterable<IntWritable> values,
-                Context context
-                ) throws IOException, InterruptedException {
-            long sum = 0;
-            for (IntWritable val : values) {
-                sum += val.get();
-            }
-            result.set(sum);
-            context.write(key, result);
-        }
-    }
-    */
  
     public static void main(String[] args) throws Exception {
         int res = ToolRunner.run(new Configuration(), new WordCountImproved(), args);
