@@ -1,0 +1,9 @@
+1. Are there any parts of the original WordCount that still confuse you? If so, what?
+Ans: No, it is clear to me.
+
+2. How did the output change when you submitted with -D mapreduce.job.reduces=3? Why would this be necessary if your job produced large output sets?
+Ans. Running with 3 reducers make all the 3 reducers run parallely and thus the bigger file will be processed faster but we need a higher processing power for this. Another benefit with running with 3 reducers would be partioner would divide the output into smaller files into 3 files so it would be easier to analyze.
+
+3. How was the -D mapreduce.job.reduces=0 output different? 
+Ans. Running with 0 reducers will not send the output of mapper to reducers. Instead of piping the output to reducer the mapper will send the output as program output. 
+
