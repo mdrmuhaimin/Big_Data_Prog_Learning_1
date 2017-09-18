@@ -39,10 +39,10 @@ public class WordCountImproved extends Configured implements Tool {
                 ) throws IOException, InterruptedException {
         		String fileName = ((FileSplit) context.getInputSplit()).getPath().getName();
         		String line =  value.toString();
-        		if(line.startsWith("en")) {
-            		String[] wikiParts = line.split(" ");
+        		String[] wikiParts = line.split(" ");
+        		if(line.startsWith("en") && !wikiParts[1].startsWith("Special:") && !wikiParts[1].equals("Main_Page") ) {
             		pageHit =  new LongWritable(new Long(wikiParts[2]).longValue());
-            		word.set(wikiParts[1]);
+            		word.set(fileName);
             		context.write(word, pageHit);
         		}
     		}
