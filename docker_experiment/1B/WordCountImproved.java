@@ -31,15 +31,20 @@ public class WordCountImproved extends Configured implements Tool {
     public static class TokenizerMapper
     extends Mapper<LongWritable, Text, Text, LongWritable>{
  
-        private final static LongWritable one = new LongWritable(1);
+        private static LongWritable pageHit;
         private Text word = new Text();
  
         @Override
         public void map(LongWritable key, Text value, Context context
                 ) throws IOException, InterruptedException {
         		String fileName = ((FileSplit) context.getInputSplit()).getPath().getName();
-        		word.set(value.toString());
-        		context.write(word, one);
+        		String line =  value.toString();
+        		if(line.startsWith("en")) {
+            		String[] wikiParts = line.split(" ");
+            		pageHit =  new LongWritable(new Long(wikiParts[2]).longValue());
+            		word.set(wikiParts[1]);
+            		context.write(word, pageHit);
+        		}
     		}
     }
  
