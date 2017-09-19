@@ -48,6 +48,25 @@ public class WordCountImproved extends Configured implements Tool {
     		}
     }
  
+    public static class MaxPageCountReducer
+    extends Reducer<Text, LongWritable, Text, LongWritable> {
+        private LongWritable result = new LongWritable();
+ 
+        @Override
+        public void reduce(Text key, Iterable<LongWritable> values,
+                Context context
+                ) throws IOException, InterruptedException {
+            long max = 0;
+            for (LongWritable val : values) {
+                if ( val.get() >= max) {
+                    max = val.get();
+                }
+            }
+            result.set(max);
+            context.write(key, result);
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         int res = ToolRunner.run(new Configuration(), new WordCountImproved(), args);
         System.exit(res);
@@ -62,8 +81,8 @@ public class WordCountImproved extends Configured implements Tool {
         job.setInputFormatClass(TextInputFormat.class);
  
         job.setMapperClass(TokenizerMapper.class);
-        job.setCombinerClass(LongSumReducer.class);
-        job.setReducerClass(LongSumReducer.class);
+        job.setCombinerClass(MaxPageCountReducer.class);
+        job.setReducerClass(MaxPageCountReducer.class);
  
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(LongWritable.class);
