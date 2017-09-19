@@ -26,9 +26,9 @@ import org.apache.hadoop.mapreduce.lib.reduce.LongSumReducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
  
-public class WordCountImproved extends Configured implements Tool {
+public class WikipediaPopular extends Configured implements Tool {
  
-    public static class TokenizerMapper
+    public static class PageHitMapper
     extends Mapper<LongWritable, Text, Text, LongWritable>{
  
         private static LongWritable pageHit;
@@ -68,7 +68,7 @@ public class WordCountImproved extends Configured implements Tool {
     }
 
     public static void main(String[] args) throws Exception {
-        int res = ToolRunner.run(new Configuration(), new WordCountImproved(), args);
+        int res = ToolRunner.run(new Configuration(), new WikipediaPopular(), args);
         System.exit(res);
     }
  
@@ -76,11 +76,11 @@ public class WordCountImproved extends Configured implements Tool {
     public int run(String[] args) throws Exception {
         Configuration conf = this.getConf();
         Job job = Job.getInstance(conf, "word count");
-        job.setJarByClass(WordCountImproved.class);
+        job.setJarByClass(WikipediaPopular.class);
  
         job.setInputFormatClass(TextInputFormat.class);
  
-        job.setMapperClass(TokenizerMapper.class);
+        job.setMapperClass(PageHitMapper.class);
         job.setCombinerClass(MaxPageCountReducer.class);
         job.setReducerClass(MaxPageCountReducer.class);
  

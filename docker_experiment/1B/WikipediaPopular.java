@@ -19,47 +19,56 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.LongSumReducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
  
-public class WordCountImproved extends Configured implements Tool {
+public class WikipediaPopular extends Configured implements Tool {
  
-    public static class TokenizerMapper
+    public static class PageHitMapper
     extends Mapper<LongWritable, Text, Text, LongWritable>{
-    		@Override
+ 
+        private static LongWritable pageHit;
+        private Text word = new Text();
+ 
+        @Override
         public void map(LongWritable key, Text value, Context context
                 ) throws IOException, InterruptedException {
         		String fileName = ((FileSplit) context.getInputSplit()).getPath().getName();
-        		System.out.println(fileName);
+        		String line =  value.toString();
+        		String[] wikiParts = line.split(" ");
+        		if(line.startsWith("en") && !wikiParts[1].startsWith("Special:") && !wikiParts[1].equals("Main_Page") ) {
+            		pageHit =  new LongWritable(new Long(wikiParts[2]).longValue());
+            		word.set(fileName);
+            		context.write(word, pageHit);
+        		}
     		}
-//        private final static LongWritable one = new LongWritable(1);
-//        private Text word = new Text();
-// 
-//        @Override
-//        public void map(LongWritable key, Text value, Context context
-//                ) throws IOException, InterruptedException {
-//	        	Locale locale = new Locale("en", "ca");
-//	        	BreakIterator breakiter = BreakIterator.getWordInstance(locale);
-//	        	int start = breakiter.first();
-//	        	String line = value.toString();
-//	        	line = Normalizer.normalize(line, Normalizer.Form.NFD);
-//				breakiter.setText(line);
-//	        	for (int end = breakiter.next(); end != BreakIterator.DONE; start = end, end = breakiter.next()) {
-//	        		String brokenWord = line.substring(start,end).trim().toLowerCase(locale);
-//	        		if(brokenWord.length() > 0) {
-//	        			word.set(brokenWord);
-//	        	    	context.write(word, one);
-//	        		}
-//	        	}
-//        }
     }
  
+    public static class MaxPageCountReducer
+    extends Reducer<Text, LongWritable, Text, LongWritable> {
+        private LongWritable result = new LongWritable();
+ 
+        @Override
+        public void reduce(Text key, Iterable<LongWritable> values,
+                Context context
+                ) throws IOException, InterruptedException {
+            long max = 0;
+            for (LongWritable val : values) {
+                if ( val.get() >= max) {
+                    max = val.get();
+                }
+            }
+            result.set(max);
+            context.write(key, result);
+        }
+    }
+
     public static void main(String[] args) throws Exception {
-        int res = ToolRunner.run(new Configuration(), new WordCountImproved(), args);
+        int res = ToolRunner.run(new Configuration(), new WikipediaPopular(), args);
         System.exit(res);
     }
  
@@ -67,13 +76,13 @@ public class WordCountImproved extends Configured implements Tool {
     public int run(String[] args) throws Exception {
         Configuration conf = this.getConf();
         Job job = Job.getInstance(conf, "word count");
-        job.setJarByClass(WordCountImproved.class);
+        job.setJarByClass(WikipediaPopular.class);
  
         job.setInputFormatClass(TextInputFormat.class);
  
-        job.setMapperClass(TokenizerMapper.class);
-        job.setCombinerClass(LongSumReducer.class);
-        job.setReducerClass(LongSumReducer.class);
+        job.setMapperClass(PageHitMapper.class);
+        job.setCombinerClass(MaxPageCountReducer.class);
+        job.setReducerClass(MaxPageCountReducer.class);
  
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(LongWritable.class);
