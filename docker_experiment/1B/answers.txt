@@ -1,2 +1,8 @@
 1. In the WikipediaPopular class, it would be much more interesting to find the page that is most popular, not just the view count. What would be necessary to modify your class to do this? (You don't have to actually implement it.) 
-Ans. From the mapper output we are passing the filename as key and number of hits for each page as value. If we can pass the page which got hit as a value along with its number then we can obtain it as well. We can pass it as a string suffix/prefix and then separate it using string processing alternatively we can also pass it as a tuple. 
+Ans. From the mapper output we are passing the filename as key and number of hits for each page as value. If we can pass the page which got hit as a value along with its number then we can obtain it as well. We can pass it as a pair similar to LongPairWritable we used in RedditAverage problem. However instead we need to pass it as a pair of string and longwritable.
+
+2. Was there any noticeable difference in the running time of your RedditAverage with and without the combiner optimization?
+Ans. From a theory standpoint combiner collect each mapper result to optimize reducers performance so it should improve the performance with a combiner. However it was not noticable enough to observe it using a bare eye. 
+
+3.For the given sample inputs to EulerEstimator, how long did it take each take to complete on the cluster? Why would they be different? 
+Ans. For the given sample input euler-1 took 4 min 18 sec to complete on the other hand euler-2 took 18 sec only. The reason the second one is much faster because of the multiple file containing one input where multiple files can process parallely by multiple mapper; so we have multiple input processing at the same time, where in the first input file where one file contains all the input one mapper has to go through the entire file and process one input at a time.  
