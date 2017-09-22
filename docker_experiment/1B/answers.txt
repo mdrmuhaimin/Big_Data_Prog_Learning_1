@@ -1,0 +1,2 @@
+1. In the WikipediaPopular class, it would be much more interesting to find the page that is most popular, not just the view count. What would be necessary to modify your class to do this? (You don't have to actually implement it.) 
+Ans. From the mapper output we are passing the filename as key and number of hits for each page as value. If we can pass the page which got hit as a value along with its number then we can obtain it as well. We can pass it as a string suffix/prefix and then separate it using string processing alternatively we can also pass it as a tuple. 

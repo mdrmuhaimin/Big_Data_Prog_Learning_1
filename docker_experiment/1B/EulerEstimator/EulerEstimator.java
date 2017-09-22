@@ -43,11 +43,11 @@ public class EulerEstimator extends Configured implements Tool {
             ) throws IOException, InterruptedException {
         	long iter = Long.parseLong(value.toString());
 			long count = 0;
-			for (long i = 0; i < iter; i++) {
+			Random generator = new Random((((FileSplit) context.getInputSplit()).getPath().getName()).hashCode() + key.get());
+	        for (long i = 0; i < iter; i++) {
 			    double sum = 0.0;
 			    while (sum < 1) {
-			    	Random generator = new Random((((FileSplit) context.getInputSplit()).getPath().getName()).hashCode() + key.get());
-			        double num = generator.nextDouble();
+			    	double num = generator.nextDouble();
 			        sum += num;
 			        count ++;
 			    }
