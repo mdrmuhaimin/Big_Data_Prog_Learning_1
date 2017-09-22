@@ -2,6 +2,8 @@ rm -rf output-*
 rm -r *.class
 rm -r redditaverage.jar
 
+export HADOOP_CLASSPATH=${PWD}/jackson-annotations-2.8.10.jar:${PWD}/jackson-databind-2.8.10.jar:${PWD}/jackson-core-2.8.10.jar
+
 javac -classpath `hadoop classpath` MultiLineJSONInputFormat.java RedditAverage.java
 jar cf redditaverage.jar MultiLineJSONInputFormat*.class RedditAverage*.class
 yarn jar redditaverage.jar RedditAverage -D mapreduce.job.reduces=0 -libjars ${PWD}/jackson-annotations-2.8.10.jar,${PWD}/jackson-databind-2.8.10.jar,${PWD}/jackson-core-2.8.10.jar redditmulti-1/ output-0
