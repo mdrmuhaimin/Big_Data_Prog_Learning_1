@@ -35,15 +35,17 @@ public class WikipediaPopular extends Configured implements Tool {
         @Override
         public void map(LongWritable key, Text value, Context context
                 ) throws IOException, InterruptedException {
-        		String fileName = ((FileSplit) context.getInputSplit()).getPath().getName();
-        		String line =  value.toString();
-        		String[] wikiParts = line.split(" ");
-        		if(line.startsWith("en") && !wikiParts[1].startsWith("Special:") && !wikiParts[1].equals("Main_Page") ) {
-            		pageHit =  new LongWritable(new Long(wikiParts[2]).longValue());
-            		word.set(fileName);
-            		context.write(word, pageHit);
-        		}
-    		}
+            String fileName = ((FileSplit) context.getInputSplit()).getPath().getName();
+            String[] fileNameComponents = fileName.split("-");
+            final String fileNameTime = fileNameComponents[1] + '-' +fileNameComponents[2].substring(0,2);
+            String line =  value.toString();
+            String[] wikiParts = line.split(" ");
+            if(line.startsWith("en") && !wikiParts[1].startsWith("Special:") && !wikiParts[1].equals("Main_Page") ) {
+                pageHit =  new LongWritable(new Long(wikiParts[2]).longValue());
+                word.set(fileNameTime);
+                context.write(word, pageHit);
+            }
+        }
     }
  
     public static class MaxPageCountReducer
