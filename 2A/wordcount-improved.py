@@ -14,8 +14,8 @@ assert sc.version >= '2.2'  # make sure we have Spark 2.2+
 
 
 def words_once(line):
-    wordsep = re.compile(r'[%s\s]+' % re.escape(string.punctuation))
-    for w in wordsep.split(line):
+    word_separator = re.compile(r'[%s\s]+' % re.escape(string.punctuation))
+    for w in word_separator.split(line):
         w = unicodedata.normalize('NFD', w)
         w = w.lower()
         yield (w, 1)
@@ -35,5 +35,5 @@ words = text.flatMap(words_once)
 words = words.filter(lambda x: x != '')
 wordcount = words.reduceByKey(operator.add)
 
-outdata = wordcount.sortBy(get_key).map(output_format)
+outdata = wordcount
 outdata.saveAsTextFile(output)
