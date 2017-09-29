@@ -20,14 +20,6 @@ def words_once(line):
         w = w.lower()
         yield (w, 1)
 
-
-def sort_alpha(kv): # (apple, 2); (banana, 4)
-    k, v = kv
-    return v, -k
-
-def by_key(kv):
-    return kv[0]
-
 def output_format(kv):
     k, v = kv
     return '%s %i' % (k, v)
