@@ -1,0 +1,15 @@
+1. An RDD has many methods: it can do many more useful tricks than were at hand with MapReduce. Write a sentence or two to explain the difference between .map and .flatMap. Which is more like the MapReduce concept of mapping?
+
+In map it takes an RDD of N elements and create N elements.
+For example in our outdataRDD.map(output_format) code (line 34 in wordcount-improved.py) access each RDD key value pair and return another collection of RDD where key value is formatted as string for desired output.
+Both input and output here has same length. If our input is [(apple, 100), (banana, 500)] it will make the output ['apple 100', 'banana 500']
+
+On the other hand flatmap transform an RDD of lenght N into a collections and flatten them. The size of output depends on the code. For example in our code it takes each line of the input file and break the word and output it as key value pair.
+If our input
+'Mary has a little lamb.
+She loves book.'
+it will output as [(mary, 1), (has, 1), (a, 1), (little, 1), (lamb, 1), (she, 1), (loves, 1), (book, 1)]
+
+In my opinion flatMap is more like the MapReduce concept of mapping.
+
+2. Do the same for .reduce and .reduceByKey. Which is more like the MapReduce concept of reducing?

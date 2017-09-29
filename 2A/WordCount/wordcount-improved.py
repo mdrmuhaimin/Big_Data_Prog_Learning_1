@@ -24,13 +24,9 @@ def output_format(kv):
     k, v = kv
     return '%s %i' % (k, v)
 
-def filterEmptyString(kv):
-    return kv[0] != ''
-
-
 text = sc.textFile(inputs)
 words = text.flatMap(words_once)
-wordFiltered = words.filter(filterEmptyString)
+wordFiltered = words.filter(lambda x:x[0] != '')
 wordcount = wordFiltered.reduceByKey(operator.add)
 
 outdataRDD = wordcount.sortBy(lambda x:x[0], True).cache()

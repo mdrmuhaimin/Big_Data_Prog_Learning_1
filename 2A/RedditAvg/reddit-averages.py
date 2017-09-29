@@ -1,7 +1,6 @@
 from pyspark import SparkConf, SparkContext
 import sys
-import operator
-import re, string, json
+import json
 
 inputs = sys.argv[1]
 output = sys.argv[2]
@@ -17,10 +16,10 @@ def get_json(line):
     yield (reddit_json['subreddit'], (1, reddit_json['score']))
 
 
-def count_occurance(a, b):
-    occur_a, count_a = a
-    occur_b, count_b = b
-    return (occur_a + occur_b, count_a + count_b)
+def add_occurance_score(a, b):
+    occur_a, score_a = a
+    occur_b, score_b = b
+    return (occur_a + occur_b, score_a + score_b)
 
 
 def output_format(kv):
@@ -31,6 +30,6 @@ def output_format(kv):
 
 text = sc.textFile(inputs)
 sub_reddit_score = text.flatMap(get_json)
-score_count = sub_reddit_score.reduceByKey(count_occurance)
+score_count = sub_reddit_score.reduceByKey(add_occurance_score)
 outdata = score_count.map(output_format)
 outdata.saveAsTextFile(output)
