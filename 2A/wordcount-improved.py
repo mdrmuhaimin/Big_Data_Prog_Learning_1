@@ -21,9 +21,12 @@ def words_once(line):
         yield (w, 1)
 
 
-def get_key(kv):
-    return kv[0]
+def sort_alpha(kv): # (apple, 2); (banana, 4)
+    k, v = kv
+    return v, -k
 
+def by_key(kv):
+    return kv[0]
 
 def output_format(kv):
     k, v = kv
@@ -35,5 +38,9 @@ words = text.flatMap(words_once)
 words = words.filter(lambda x: x != '')
 wordcount = words.reduceByKey(operator.add)
 
-outdata = wordcount
-outdata.saveAsTextFile(output)
+outdataRDD = wordcount.sortBy(lambda x:x[0], True).cache()
+outdataByWord = outdataRDD.map(output_format)
+outdataByFreq = outdataRDD.sortBy(lambda x:x[1], False).map(output_format)
+
+outdataByWord.saveAsTextFile(output+'/by-word')
+outdataByFreq.saveAsTextFile(output+'/by-freq')
