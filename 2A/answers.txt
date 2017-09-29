@@ -1,15 +1,36 @@
 1. An RDD has many methods: it can do many more useful tricks than were at hand with MapReduce. Write a sentence or two to explain the difference between .map and .flatMap. Which is more like the MapReduce concept of mapping?
 
-In map it takes an RDD of N elements and create N elements.
-For example in our outdataRDD.map(output_format) code (line 34 in wordcount-improved.py) access each RDD key value pair and return another collection of RDD where key value is formatted as string for desired output.
+In map it takes an RDD of N elements and create N elements. It returns a new RDD by applying a specified function to each element of a given RDD
+For example in our outdataRDD.map(output_format) code (line 34 in wordcount-improved.py) access each RDD key value pair and return another collection
+of RDD where key value is formatted as string for desired output.
 Both input and output here has same length. If our input is [(apple, 100), (banana, 500)] it will make the output ['apple 100', 'banana 500']
 
-On the other hand flatmap transform an RDD of lenght N into a collections and flatten them. The size of output depends on the code. For example in our code it takes each line of the input file and break the word and output it as key value pair.
-If our input
-'Mary has a little lamb.
-She loves book.'
-it will output as [(mary, 1), (has, 1), (a, 1), (little, 1), (lamb, 1), (she, 1), (loves, 1), (book, 1)]
+On the other hand flatmap transform an RDD of lenght N into a new RDD by applying a function to each element of it and flatten them. The size of output depends on the code.
+For example in our code it takes each line of the input file and break the word and output it as key value pair.
+If our input RDD
+['Mary has a little lamb.',
+'She loves book.']
+Using the words_once function (defined in line 16 of our code) using flatMap with our input RDD will produce output as
+[(mary, 1), (has, 1), (a, 1), (little, 1), (lamb, 1), (she, 1), (loves, 1), (book, 1)]
 
 In my opinion flatMap is more like the MapReduce concept of mapping.
 
 2. Do the same for .reduce and .reduceByKey. Which is more like the MapReduce concept of reducing?
+
+reduce, reduces the element of the applied RDD using the given commutative and associative binary operator, on the other hand reduceByKey merge the values for each key using an associative and commutative reduce function.
+For example for the code
+>>> rdd = sc.parallelize([2, 5, 16, 7, 8])
+>>> print(rdd.reduce(lambda x, y: x + y))
+ will print the summation of list 38
+
+Also,
+>>> rdd = sc.parallelize([("mary", 1), ("has", 1), ("mary", 1)])
+>>> print(rdd.reduceByKey(operator.add).collect())
+Output will be
+[("mary", 2), ("has", 1)]
+
+In my opinion reduceByKey is more like the MapReduce concept of reducing
+
+
+Ref: The definition of the function was based on the comment of the code provided in the Spark official github repository
+https://github.com/apache/spark/blob/master/python/pyspark/rdd.py
