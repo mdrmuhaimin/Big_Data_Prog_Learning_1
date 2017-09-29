@@ -17,18 +17,21 @@ def words_once(line):
     word_separator = re.compile(r'[%s\s]+' % re.escape(string.punctuation))
     for w in word_separator.split(line):
         w = unicodedata.normalize('NFD', w)
-        w = w.lower()
+        w = w.lower().strip(' ')
         yield (w, 1)
 
 def output_format(kv):
     k, v = kv
     return '%s %i' % (k, v)
 
+def filterEmptyString(kv):
+    return kv[0] != ''
+
 
 text = sc.textFile(inputs)
 words = text.flatMap(words_once)
-words = words.filter(lambda x: x != '')
-wordcount = words.reduceByKey(operator.add)
+wordFiltered = words.filter(filterEmptyString)
+wordcount = wordFiltered.reduceByKey(operator.add)
 
 outdataRDD = wordcount.sortBy(lambda x:x[0], True).cache()
 outdataByWord = outdataRDD.map(output_format)
