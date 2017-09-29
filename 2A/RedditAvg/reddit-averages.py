@@ -11,7 +11,7 @@ assert sys.version_info >= (3, 5)  # make sure we have Python 3.5+
 assert sc.version >= '2.2'  # make sure we have Spark 2.2+
 
 
-def get_json(line):
+def get_subreddit_occurance_score_pair(line):
     reddit_json = json.loads(line)
     yield (reddit_json['subreddit'], (1, reddit_json['score']))
 
@@ -29,7 +29,7 @@ def output_format(kv):
 
 
 text = sc.textFile(inputs)
-sub_reddit_score = text.flatMap(get_json)
+sub_reddit_score = text.flatMap(get_subreddit_occurance_score_pair)
 score_count = sub_reddit_score.reduceByKey(add_occurance_score)
 outdata = score_count.map(output_format)
 outdata.saveAsTextFile(output)
