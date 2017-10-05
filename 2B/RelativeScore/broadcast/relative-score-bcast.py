@@ -28,15 +28,14 @@ def calc_avg(kv):
     k, v = kv
     return (k, v[1]/v[0])
 
-def get_relative_score(commendata):
-    yield (commendata[1][0]['author'], commendata[1][0]['score'] / commendata[1][1])
+def get_relative_score(commendata, avg):
+    yield (commendata['author'], commendata['score'] / avg)
 
 
 text = sc.textFile(inputs)
 sub_reddit_datas = text.flatMap(get_subreddit_data).cache()
 sub_reddit_score = sub_reddit_datas.map(lambda x: (x[0], (1, x[1]['score'])))
 score_count = sub_reddit_score.reduceByKey(add_occurance_score)
-reddit_avg = score_count.map(calc_avg)
-redditdata_with_avgscore = sub_reddit_datas.join(reddit_avg)
-relative_score = redditdata_with_avgscore.flatMap(get_relative_score).sortBy(lambda x:x[1], False) #lambda x: yield (x[1][0]['author'], x[1][0]['score']/x[1][1]))
+reddit_avg = sc.broadcast(dict(score_count.map(calc_avg).collect()))
+relative_score = sub_reddit_datas.flatMap(lambda x: get_relative_score(x[1], reddit_avg.value[x[0]])).sortBy(lambda x:x[1], False)
 relative_score.saveAsTextFile(output)
