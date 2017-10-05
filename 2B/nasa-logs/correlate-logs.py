@@ -2,6 +2,7 @@ from pyspark import SparkConf, SparkContext
 import sys
 import json
 import re
+import math
 
 inputs = sys.argv[1]
 output = sys.argv[2]
@@ -26,26 +27,30 @@ def add_occurance_byte(a, b):
 def get_attributes(host_with_attributes):
     x = host_with_attributes[1][0]
     y = host_with_attributes[1][1]
-    return ('x', x) , ('y', y), ('xx', x*x), ('yy', y*y), ('xy', x*y), ('n', 1)
+    return (x, y, x*x, y*y, x*y, 1)
 
 
 def calc_r_vars(a, b):
-    return a + b
-
-def output_format(kv):
-    k, v = kv
-    tuple_output = (k, v[1]/v[0])
-    return json.dumps(tuple_output)
-
+    return tuple(sum(p) for p in zip(a, b))
+    # return [x + y for x, y in zip(a, b)]
 
 text = sc.textFile(inputs)
-host_with_trans_data = text.flatMap(get_host_with_trans_data).reduceByKey(add_occurance_byte).flatMap(get_attributes)
-# host_with_trans_data.saveAsTextFile(output)
-correlation_coefficient_var = host_with_trans_data.reduceByKey(calc_r_vars)
-print(type(correlation_coefficient_var))
-correlation_coefficient_var.saveAsTextFile(output)
+host_with_trans_data = text.flatMap(get_host_with_trans_data)\
+    .reduceByKey(add_occurance_byte)\
+    .map(get_attributes)
+correlation_coefficient_variables = host_with_trans_data.reduce(calc_r_vars)
+x = correlation_coefficient_variables[0]
+y = correlation_coefficient_variables[1]
+xx = correlation_coefficient_variables[2]
+yy = correlation_coefficient_variables[3]
+xy = correlation_coefficient_variables[4]
+n = correlation_coefficient_variables[5]
 
+r = (n * xy - x * y) / math.sqrt((n * xx - x * x) * ( n * yy - y * y))
+print('r = {}'.format(r))
+print('r^2 = {}'.format(r * r))
 
-# score_count = sub_reddit_score.reduceByKey(add_occurance_score)
-# outdata = score_count.map(output_format)
-# outdata.saveAsTextFile(output)
+f = open(output,'w+')
+f.write('r = {}\n'.format(r))
+f.write('r^2 = {}\n'.format(r * r))
+f.close()
