@@ -29,6 +29,8 @@ def calc_avg(kv):
     return (k, v[1]/v[0])
 
 def get_relative_score(commendata, avg):
+    if(avg < 0):
+        pass
     yield (commendata['author'], commendata['score'] / avg)
 
 
