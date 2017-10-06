@@ -5,4 +5,4 @@ unzip reddit-1.zip
 rm reddit-1.zip
 spark-submit relative-score.py reddit-1 output-1
 rm -r reddit-1
-#cat output-1/part-*
+cat output-1/part-*

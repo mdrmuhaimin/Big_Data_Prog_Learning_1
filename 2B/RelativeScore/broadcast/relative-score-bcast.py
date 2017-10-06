@@ -12,11 +12,21 @@ assert sc.version >= '2.2'  # make sure we have Spark 2.2+
 
 
 def get_subreddit_data(line):
+    """Extract the subreddit data from a line.
+
+    @param: line from the input
+
+    """
     reddit_json = json.loads(line)
     yield (reddit_json['subreddit'], reddit_json)
 
 
 def add_occurance_score(a, b):
+    """Reducerd function to get sum of occurance and score for each host
+
+    @param: input from reducer
+
+    """
     occur_a, sub_reddit_a = a
     occur_b, sub_reddit_b = b
     combined_occurance = occur_a + occur_b
@@ -25,11 +35,22 @@ def add_occurance_score(a, b):
 
 
 def calc_avg(kv):
+    """Calculate average score for a subreddit
+
+    @param: A tuple of where subreddit name is key and value is a tuple of Sum of occurance and score,
+    which is calculating avg score and return it as a tuple
+
+    """
     k, v = kv
     return (k, v[1]/v[0])
 
 def get_relative_score(commendata, avg):
-    if(avg < 0):
+    """Calculate relative score for a subreddit author only for subreddit with average score greater than 0
+
+    @param: subreddit comment data
+
+    """
+    if(avg < 0): # If an average is less than 0 then we are not passing it to generator sp we are not considering it.
         pass
     yield (commendata['author'], commendata['score'] / avg)
 

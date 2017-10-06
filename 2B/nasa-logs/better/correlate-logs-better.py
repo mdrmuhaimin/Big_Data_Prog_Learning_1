@@ -1,6 +1,5 @@
 from pyspark import SparkConf, SparkContext
 import sys
-import json
 import re
 import math
 
@@ -57,10 +56,8 @@ y_avg = total_byte / total_host
 correlation_coefficient_variables_list = host_with_trans_data.map(lambda x: calc_r_vars_list(x[1][0], x[1][1], x_avg, y_avg))
 correlation_coefficient_variables = correlation_coefficient_variables_list.reduce(calc_r_vars)
 r = correlation_coefficient_variables[0] / math.sqrt(correlation_coefficient_variables[1] * correlation_coefficient_variables[2])
-print(total_host)
-print(total_byte)
-print(total_host_hit)
-print( x_avg, y_avg)
-print(r)
-print(r*r)
-# correlation_coefficient_variables_list.saveAsTextFile(output)
+
+print('r = {}'.format(r))
+print('r^2 = {}'.format(r * r))
+
+sc.parallelize(['r={}\nr^2={}'.format(r, r*r)]).saveAsTextFile(output)
