@@ -50,7 +50,7 @@ def get_relative_score(commendata, avg):
     @param: subreddit comment data
 
     """
-    if(avg < 0): # If an average is less than 0 then we are not passing it to generator sp we are not considering it.
+    if(avg < 0): # If an average is less than 0 then we are not passing it to generator so we are not considering it.
         pass
     yield (commendata['author'], commendata['score'] / avg)
 
@@ -61,4 +61,5 @@ sub_reddit_score = sub_reddit_datas.map(lambda x: (x[0], (1, x[1]['score'])))
 score_count = sub_reddit_score.reduceByKey(add_occurance_score)
 reddit_avg = sc.broadcast(dict(score_count.map(calc_avg).collect()))
 relative_score = sub_reddit_datas.flatMap(lambda x: get_relative_score(x[1], reddit_avg.value[x[0]])).sortBy(lambda x:x[1], False)
+reddit_avg.unpersist()
 relative_score.saveAsTextFile(output)

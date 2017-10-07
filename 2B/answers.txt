@@ -1,36 +1,29 @@
-1. An RDD has many methods: it can do many more useful tricks than were at hand with MapReduce. Write a sentence or two to explain the difference between .map and .flatMap. Which is more like the MapReduce concept of mapping?
+Under what conditions will the broadcast join be faster than an actual join?
+Broadcast create a readonly variable in cache that each executor can access and read from. Usually we broadcast a variable which is
+used by multiple executors. So with broadcast join we can load it to cache once and all the executor can access it, without it all the executor needs to have
+a copy of it to access it. In our code when we broadcast the average value all the executor get the broadcast value from the cache to calculte
+the relative average. Without it when we do the join operations all the executors needs to hold a copy of average value and do the join operations and thus make it slow.
+So as longs as we parse the RDD to extract the average and then broadcast it. All the executor will join only the average and thus make the program faster.
 
-In map it takes an RDD of N elements and create N elements. It returns a new RDD by applying a specified function to each element of a given RDD
-For example in our outdataRDD.map(output_format) code (line 34 in wordcount-improved.py) access each RDD key value pair and return another collection
-of RDD where key value is formatted as string for desired output.
-Both input and output here has same length. If our input is [(apple, 100), (banana, 500)] it will make the output ['apple 100', 'banana 500']
+When will the broadcast join be slower?
+Broadcast join will be slower if not used properly. When we broadcast we need to understand the key portion that each executor needs, and broadcast only that value.
+If we broadcase a huge value without parsing and later get the value in executor and parse the data then each executor will work with a bigger size of data and thus make the program slower.
+For example we have an array of 100000 element. All we need may be the first 100 element in each executor so in that case we should parse and broadcast first 100 element. So each
+executor can work with a smaller dataset.
+Another important thing is to broadcast in a stage. For example of amongst this 100 elements only 10 variable needs to be used for the entire execution of code. Other 90 only be used
+in some part of the code. The ideal approach would be to broadcast the 90 variable as late as possible and unpersist it as soon as it not needed anymore. However a key
+point to remember is not to change the broadcast variable after it is propagated to the nodes.
+In our code instead of the average if we broadcast a rdd object without parsing the average from subreddit data it will not be very efficient because in that case each executor
+needs to work with this huge data to parse the avg.
 
-On the other hand flatmap transform an RDD of lenght N into a new RDD by applying a function to each element of it and flatten them. The size of output depends on the code.
-For example in our code it takes each line of the input file and break the word and output it as key value pair.
-If our input RDD
-['Mary has a little lamb.',
-'She loves book.']
-Using the words_once function (defined in line 16 of our code) using flatMap with our input RDD will produce output as
-[(mary, 1), (has, 1), (a, 1), (little, 1), (lamb, 1), (she, 1), (loves, 1), (book, 1)]
+What was the problem with the input data wordcount-4? How did you fix the wordcount program so it handled this input and processed it more quickly?
+The problem with the input data was it as not evenly sized. So when spark initially read it from the input and created partition, they were handling data with uneven size.
+Two files are in our data set are much bigger compare to the other partitions. So two executor was creating a bottleneck because data from the two bigger file was not distributing properly amongst all the
+executors. So to fix this problem we need to repartition as soon as we create our RDD. Based on the size of our data set we can do around 120 partition to work with
+our data. Our input can be like text = sc.textFile(inputs).repartition(120)
 
-In my opinion flatMap is more like the MapReduce concept of mapping.
-
-2. Do the same for .reduce and .reduceByKey. Which is more like the MapReduce concept of reducing?
-
-reduce, reduces the element of the applied RDD using the given commutative and associative binary operator, on the other hand reduceByKey merge the values for each key using an associative and commutative reduce function.
-For example for the code
->>> rdd = sc.parallelize([2, 5, 16, 7, 8])
->>> print(rdd.reduce(lambda x, y: x + y))
- will print the summation of list 38
-
-Also,
->>> rdd = sc.parallelize([("mary", 1), ("has", 1), ("mary", 1)])
->>> print(rdd.reduceByKey(operator.add).collect())
-Output will be
-[("mary", 2), ("has", 1)]
-
-In my opinion reduceByKey is more like the MapReduce concept of reducing
-
-
-Ref: The definition of the function was based on the comment of the code provided in the Spark official github repository
-https://github.com/apache/spark/blob/master/python/pyspark/rdd.py
+The answers were based on the reading from the following sites
+http://spark.apache.org/docs/latest/rdd-programming-guide.html#broadcast-variables
+https://blog.knoldus.com/2016/04/30/broadcast-variables-in-spark-how-and-when-to-use-them/
+https://stackoverflow.com/questions/41580725/what-is-the-disadvantages-of-spark-broadcast-variable
+https://stackoverflow.com/questions/37468405/tips-for-properly-using-large-broadcast-variables/37489738#37489738
