@@ -6,7 +6,7 @@ import math
 inputs = sys.argv[1]
 output = sys.argv[2]
 
-conf = SparkConf().setAppName('reddit averages')
+conf = SparkConf().setAppName('correlate logs')
 sc = SparkContext(conf=conf)
 assert sys.version_info >= (3, 5)  # make sure we have Python 3.5+
 assert sc.version >= '2.2'  # make sure we have Spark 2.2+
