@@ -1,0 +1,5 @@
+spark-warehouse
+metastore_db
+weather-*
+output-*
+**/output*
