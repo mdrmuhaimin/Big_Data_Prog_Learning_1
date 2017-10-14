@@ -1,0 +1,64 @@
+What was the running time for your three reddit-averages implementations? How can you explain the differences?
+Ans.
+Running time of three reddit averages.
+----------------------------------------------------------
+|                                 | Regular  |   PyPy    |
+----------------------------------------------------------
+|RedditAverage from assignment 2A |  59.7s   |   51.8s   |
+----------------------------------------------------------
+|RedditAverage SQL with Schema    |  50s     |   48.33s  |
+----------------------------------------------------------
+|RedditAverage SQL without Schema | 1m 17.5s |  1m 18.7s |
+----------------------------------------------------------
+
+If we see when we run without PyPy the fastest one is the RedditAverage SQL with Schema, then we have RedditAverage from assignment 2A and lastly
+we have RedditAverage SQL without Schema. The reason behind SQL with schema is the fastest because when we use dataframe for all the computation related
+actually happen in JVM. So we are not getting slowed down by Python's slower computation. On the other hand in our last week assignment we
+used RDD where operations are happened in Python which is a bit slower, that explains the difference between the speed of RedditAverage SQL with Schema
+and RedditAverage from assignment 2A on the other hand RedditAverage SQL without Schema is slower because then data must read twice once to define the schema
+and again to actually load the data. Also when we use dataframe using pypy doesn't make a difference because we are not using Python for computation, on the other
+hand pypy improves performance for our last week's code because we used RDD for computation.
+
+
+
+How much difference did Python implementation make (PyPy vs the default CPython)? Why would it make so much/little difference sometimes?
+Ans:
+----------------------------------------------------------
+|                                 | Regular  |   PyPy    |
+----------------------------------------------------------
+|RedditAverage from assignment 2A |  59.7s   |   51.8s   |
+----------------------------------------------------------
+|RedditAverage SQL with Schema    |  50s     |   48.33s  |
+----------------------------------------------------------
+|RedditAverage SQL without Schema | 1m 17.5s |  1m 18.7s |
+----------------------------------------------------------
+
+For RedditAverage SQL with Schema and RedditAverage SQL without Schema using PyPy doesn't make a big difference because in both case we are using data frame for our
+operations which runs on lower level JVM; pypy speed up python based computation, so when we use pypy in our last week's implementation it significantly improved the performance.
+Another interesting thing we can notice here when we use pypy, our last week's program and our schema based implementation difference become very little. Because in both case we overcome
+the python slow interpretation bottleneck (last week's one by using just-in time compiler pypy and this week's one by compute in lower level JVM using dataframe).
+
+
+
+How does your Spark implementation running time compare to my MapReduce time? What do you think accounts for the difference?
+Ans:
+Map reduce implementation take around 1m 28 second compare to schema based operation's 50s. The reason map reduce takes a bit longer because it write on the disk in between
+the operations. On other hand spark use memories. I/O operations in disk is expensive compares to memory operations by spark. That is why map reduce takes longer that spark
+operations.
+
+What statements did you execute to get the total number of bytes transferred (including reading the Parquet data)? What was the number?
+Ans.
+Initially I will load spark
+
+>   from pyspark.sql import SparkSession
+>   spark = SparkSession.builder.appName('ingest_logs').getOrCreate()
+
+Aftwerwards I will run the following operations to read the total number of bytes transferred
+
+>   parquet_dir = path/to/parquet/file/dir
+>   logs = spark.read.parquet(parquet_dir)
+>   logs.createOrReplaceTempView("logs")
+>   sum = spark.sql(""" SELECT SUM(bytes) FROM logs""")
+>   sum.show()
+
+And number I got is 3.6133736E7 (3.6133736 x 10^7)
