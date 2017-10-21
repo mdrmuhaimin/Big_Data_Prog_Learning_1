@@ -42,7 +42,9 @@ public class WikipediaPopular extends Configured implements Tool {
         		String[] wikiParts = line.split(" ");
         		if(line.startsWith("en") && !wikiParts[1].startsWith("Special:") && !wikiParts[1].equals("Main_Page") ) {
             		pageHit =  new LongWritable(new Long(wikiParts[2]).longValue());
-            		word.set(fileName);
+            		String[] fileNameComponents = fileName.split("-");
+                    String timeHour = fileNameComponents[fileNameComponents.length - 2] + "-" + fileNameComponents[fileNameComponents.length - 1].substring(0,2);
+                    word.set(timeHour);
             		context.write(word, pageHit);
         		}
     		}

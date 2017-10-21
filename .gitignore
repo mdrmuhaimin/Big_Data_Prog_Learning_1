@@ -2,3 +2,5 @@
 **/*/.idea
 **/*/*.log
 **/*/metastore_db
+**output-*
+**.class

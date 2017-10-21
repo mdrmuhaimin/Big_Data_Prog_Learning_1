@@ -3,7 +3,7 @@ rm -r output-*
 #curl http://cmpt732.csil.sfu.ca/datasets/weather-1.zip -o weather-1.zip
 #unzip weather-1.zip
 #rm weather-1.zip
-spark-submit temp_range_fix.py weather-1 output-1-flag-fix
+spark-submit temp_range_sql.py weather-1 output-1-flag-fix
 spark-submit temp_range.py weather-1 output-1-no-flag-fix
 #rm -r weather-1
 

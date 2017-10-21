@@ -1,0 +1,5 @@
+1. For the weather data question, did you prefer writing the “DataFrames + Python methods” style, or the “temp tables + SQL syntax” style form solving the problem? Why?
+Ans. Based on my experience so far I like the "DataFrames + Python methods" because it simplifies some longer SQL queries into sorter chained functions.
+
+2. Which do you think produces more readable code?
+Ans. I find the "DataFrames + Python methods" slightly easy to read than temp tables + SQL syntax because of its simpler syntax.

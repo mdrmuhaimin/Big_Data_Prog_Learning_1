@@ -39,6 +39,8 @@ def main():
     joined_df = df_max.join(df_by_date, ["date", "range"], 'inner')
     joined_df = joined_df.select('date', 'station', 'range')
     joined_df.show()
+    if not os.path.exists(output):
+        os.makedirs(output)
     joined_df.write.csv(output, sep=' ', mode='overwrite')
 
 if __name__ == "__main__":

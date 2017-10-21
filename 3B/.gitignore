@@ -1,0 +1,6 @@
+**/spark-warehouse
+**/metastore_db
+**weather-*
+output-*
+**pagecounts-*
+**graph-*

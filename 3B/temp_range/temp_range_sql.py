@@ -5,7 +5,7 @@ import os
 inputs = sys.argv[1]
 output = sys.argv[2]
 
-spark = SparkSession.builder.appName('temp_range').getOrCreate()
+spark = SparkSession.builder.appName('temp_range_sql').getOrCreate()
 sc = spark.sparkContext
 assert sys.version_info >= (3, 5)  # make sure we have Python 3.5+
 assert sc.version >= '2.2'  # make sure we have Spark 2.2+
