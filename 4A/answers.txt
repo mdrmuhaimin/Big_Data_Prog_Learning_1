@@ -1,0 +1,17 @@
+Error:
+NoHostAvailable: ('Unable to complete the operation against any hosts', {<Host: 199.60.17.171 datacenter1>: Unavailable('Error from server: code=1000 [Unavailable exception] message="Cannot achieve consistency level ONE" info={\'required_replicas\': 1, \'alive_replicas\': 0, \'consistency\': \'ONE\'}',)})
+
+
+CONSISTENCY ONE;
+INSERT INTO test1 (id, data) VALUES (6, 'hexadecimal');
+SELECT * FROM test1;
+CONSISTENCY ALL;
+INSERT INTO test1 (id, data) VALUES (9, 'nines');
+SELECT * FROM test1;
+SELECT * FROM test1 WHERE id=1;
+SELECT * FROM test1 WHERE id=2;
+SELECT * FROM test1 WHERE id=3;
+SELECT * FROM test1 WHERE id=4;
+
+
+CREATE TABLE nasalogs ( logid uuid, host TEXT, datetime TIMESTAMP, path TEXT, bytes INT, PRIMARY KEY (logid) );
