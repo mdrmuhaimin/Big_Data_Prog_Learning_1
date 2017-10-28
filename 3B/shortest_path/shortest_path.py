@@ -66,11 +66,12 @@ def main():
             node_path = node_path_without_revisited_node.cache()
 
         found_path_for_node = found_path_for_node.union(node_path.map(lambda x:x[0])) # adding newly found node_path with already found path
-        node_path.map( lambda x:'Node {}: Distance from source = {}, Path from source: {}'.format(x[0], len(x[1]), '->'.join(x[1])) )\
+        node_path.map( lambda x:'Node {}: Distance from source = {}, Path from source: {}'.format(x[0], len(x[1]) - 1, '->'.join(x[1])) )\
             .saveAsTextFile(output+ '/iter-' + str(i+1))
         result = node_path.filter(lambda x: x[0] == dest_node)
         if not result.isEmpty():
             result.flatMap( lambda x: x[1]).saveAsTextFile(output+ '/path')
+            # sc.coalesce(result.flatMap( lambda x: x[1]))
             node_path.unpersist()
             break
 
