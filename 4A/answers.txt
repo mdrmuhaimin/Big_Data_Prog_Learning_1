@@ -30,4 +30,4 @@ when we have to aggregate data by host then we should use a primary key as a com
 of our tuple and uuid can be second element.
 
 6. What was the CQL query you used (or tried) to get the total number of bytes?
-Ans. SELECT SUM(bytes) from nasalogs;
+Ans. SELECT SUM(bytes) FROM nasalogs;
