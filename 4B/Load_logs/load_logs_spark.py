@@ -24,15 +24,21 @@ def get_host_with_trans_data(line):
     # Logs = Row("host", "datetime", "path", "bytes")
     line_re = re.compile(r'^(\S+) - - \[(\S+) [+-]\d+\] "[A-Z]+ (\S+) HTTP/\d\.\d" \d+ (\d+)$')
     words = line_re.split(line)
-    if(len(words) > 1):
+    if(len(words) >= 4):
         yield ({'logid':uuid.uuid1(), 'host':words[1], 'datetime': datetime.datetime.strptime(words[2], '%d/%b/%Y:%H:%M:%S'), 'path': words[3], 'bytes': float(words[4])})
 
 
 def main():
     text = sc.textFile(inputs)
+    partition_count = int(text.count() / 200) # As we want 200 data per partition
+    text = text.repartition(partition_count)
     host_with_trans_data = text.flatMap(get_host_with_trans_data)
+    # print('Size of partitions')
+    # print(host_with_trans_data.mapPartitions(lambda it: [sum(1 for _ in it)]).collect())
+    # print('Size of partitions')
+    # print(host_with_trans_data.mapPartitions(lambda it: [sum(1 for _ in it)]).collect())
     host_with_trans_data.saveToCassandra(keyspace, table, consistency_level=ConsistencyLevel.ONE)
-    print(host_with_trans_data.collect())
+    # print(host_with_trans_data.collect())
     # text.saveToCassandra()
 
 if __name__ == "__main__":
