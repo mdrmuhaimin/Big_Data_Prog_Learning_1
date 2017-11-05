@@ -9,7 +9,9 @@ inputs = sys.argv[1]
 keyspace = sys.argv[2]
 table = sys.argv[3]
 
-cluster_seeds = ['127.0.0.1'] #['199.60.17.171', '199.60.17.188']
+# cluster_seeds = ['127.0.0.1']
+cluster_seeds = ['199.60.17.171', '199.60.17.188']
+
 conf = SparkConf().setAppName('Load Logs Spark') \
         .set('spark.cassandra.connection.host', ','.join(cluster_seeds))
 sc = pyspark_cassandra.CassandraSparkContext(conf=conf)

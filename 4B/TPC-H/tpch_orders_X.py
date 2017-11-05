@@ -27,8 +27,8 @@ def df_for(keyspace, table, split_size=None):
     return df
 
 def main():
-    tpch = rdd_for(keyspace, table)
-
+    tpch = df_for(keyspace, table)
+    print(tpch.collect())
 
 if __name__ == "__main__":
     main()
