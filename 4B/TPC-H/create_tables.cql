@@ -6,6 +6,8 @@ DROP TABLE part;
 DROP TABLE region ;
 DROP TABLE supplier;
 DROP TABLE lineitem;
+DROP TABLE orders_parts;
+
 CREATE TABLE customer (
   custkey int,
   name text,
@@ -25,6 +27,19 @@ CREATE TABLE nation (
   PRIMARY KEY (nationkey)
 );
 CREATE TABLE orders (
+  orderkey int,
+  custkey int,
+  orderstatus text,
+  totalprice decimal,
+  orderdate text,
+  order_priority text,
+  clerk text,
+  ship_priority int,
+  comment text,
+  PRIMARY KEY (orderkey)
+);
+CREATE TABLE orders_parts (
+  part_names set<text>,
   orderkey int,
   custkey int,
   orderstatus text,

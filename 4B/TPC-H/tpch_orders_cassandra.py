@@ -4,8 +4,8 @@ import sys
 # import math
 from pyspark import SparkConf
 import pyspark_cassandra
-from pyspark.sql import SparkSession, types, functions
-from pyspark.sql import SQLContext
+from pyspark_cassandra import Row
+from pyspark.sql import SparkSession, SQLContext
 
 
 keyspace = sys.argv[1]
@@ -26,19 +26,22 @@ assert sc.version >= '2.2'  # make sure we have Spark 2.2+
 
 def get_orders_parts(keyspace, split_size=None):
     sqlContext = SQLContext(sc)
-    df = sqlContext.\
-        createDataFrame(
-        sc.cassandraTable(keyspace, 'lineitem', split_size=split_size).
-            select('orderkey', 'partkey').
-            joinWithCassandraTable(keyspace, 'orders').
-            on('orderkey', 'totalprice').
-            select('partkey').
-            joinWithCassandraTable(keyspace, 'part').
-            on('partkey').
-            select('name').
-            setName('orders_parts')
-    )
-    df.createOrReplaceTempView('orders')
+    print(orderkeys)
+    rdd = sc.cassandraTable(keyspace, 'lineitem', split_size=split_size).\
+            select('orderkey', 'partkey').\
+            where('orderkey IN ?', orderkeys)
+
+    rdd_lineitem_joined_order =  rdd.joinWithCassandraTable(keyspace, 'orders').\
+            on('orderkey').\
+            select('totalprice'). \
+            map(lambda row: Row(orderkey=row[0]['orderkey'], partkey=row[0]['partkey'], totalprice=row[1]['totalprice']))
+
+    rdd_lineitem_joined_order_partkey = rdd_lineitem_joined_order.joinWithCassandraTable(keyspace, 'part').\
+            on('partkey').\
+            select('name').\
+            map(lambda row: Row(orderkey=row[0]['orderkey'], totalprice=row[0]['totalprice'], name=row[1]['name']))
+
+    df = sqlContext.createDataFrame(rdd_lineitem_joined_order_partkey)
     return df
 
 def main():
@@ -47,3 +50,34 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    # sc.cassandraTable(keyspace, 'lineitem', split_size=split_size).
+    # select('orderkey', 'partkey').
+    # joinWithCassandraTable(keyspace, 'orders').
+    # select('orderkey', 'totalprice').
+    # # ('partkey').
+    # joinWithCassandraTable(keyspace, 'part').
+    # on('partkey').
+    # select('name').
+    # setName('orders_parts')
+
+    # sc.cassandraTable(keyspace, 'lineitem', split_size=split_size).
+    #     # select('orderkey','partkey').
+    #     # where('orderkey IN ?', orderkeys).
+    #     joinWithCassandraTable(keyspace, 'orders').
+    #     on('orderkey').
+    #     # select('totalprice').
+    #     joinWithCassandraTable(keyspace, 'part').
+    #     on('partkey').
+    #     # select('name').
+    #     setName('orders')
+    #
+# sc.cassandraTable(keyspace, 'lineitem', split_size=split_size).
+#             # select('orderkey').
+#             joinWithCassandraTable(keyspace, 'orders').
+#             on('orderkey').
+#             select('totalprice').
+#             # joinWithCassandraTable(keyspace, 'part').
+#             # on('partkey').
+#             # select('name').
+#             setName('orders')

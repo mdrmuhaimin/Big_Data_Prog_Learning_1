@@ -42,7 +42,9 @@ def main():
     orders = spark.sql("""SELECT o.orderkey, o.totalprice, p.name FROM
               orders o
               JOIN lineitem l ON (o.orderkey = l.orderkey)
-              JOIN part p ON (l.partkey = p.partkey)""")
+              JOIN part p ON (l.partkey = p.partkey)
+              WHERE o.orderkey IN {0}
+              """.format(tuple(orderkeys)))
     orders.show()
 
 if __name__ == "__main__":
