@@ -3,7 +3,7 @@ from pyspark import SparkConf
 from cassandra import ConsistencyLevel
 import pyspark_cassandra
 from pyspark_cassandra import Row
-from pyspark.sql import SparkSession, SQLContext, functions as f, types
+from pyspark.sql import SparkSession, SQLContext, functions, types
 
 input_keyspace = sys.argv[1]
 output_keyspace = sys.argv[2]
@@ -31,13 +31,26 @@ def df_for(keyspace, table, split_size=None):
     df.createOrReplaceTempView(table)
     return df
 
-toStringList = f.UserDefinedFunction(lambda names: names.split(' '), types.ArrayType(types.StringType()))
+toStringList = functions.UserDefinedFunction(lambda names: names.split(' '), types.ArrayType(types.StringType()))
 
 def row_to_dict(row):
     return row.asDict()
 
 def save_rdd_to_cassandra(rdd):
     rdd.saveToCassandra(output_keyspace, 'orders_parts', consistency_level=ConsistencyLevel.ONE, batch_size = 100)
+
+def agg_orders(order_rdd):
+    order_rdd.cache()
+    orders_name = order_rdd \
+        .select('orderkey', 'name') \
+        .groupby("orderkey") \
+        .agg(functions.collect_set("name").alias('name'))
+    orders_price = order_rdd \
+        .select('orderkey', 'totalprice') \
+        .groupby("orderkey") \
+        .agg(functions.sum("totalprice").alias('totalprice'))
+    order_rdd.unpersist()
+    return orders_name.join(orders_price, 'orderkey')
 
 def main():
     orders = df_for(input_keyspace, 'orders')

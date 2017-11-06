@@ -4,8 +4,7 @@ import sys
 # import math
 from pyspark import SparkConf
 import pyspark_cassandra
-from pyspark.sql import SparkSession, types, functions
-from pyspark.sql import SQLContext
+from pyspark.sql import SQLContext, SparkSession, types, functions
 
 
 keyspace = sys.argv[1]
@@ -35,6 +34,20 @@ def df_for(keyspace, table, split_size=None):
     df.createOrReplaceTempView(table)
     return df
 
+def agg_orders(order_rdd):
+    order_rdd.cache()
+    orders_name = order_rdd \
+        .select('orderkey', 'name') \
+        .groupby("orderkey") \
+        .agg(functions.collect_set("name").alias('name'))
+    orders_price = order_rdd \
+        .select('orderkey', 'totalprice') \
+        .groupby("orderkey") \
+        .agg(functions.sum("totalprice").alias('totalprice'))
+    order_rdd.unpersist()
+    return orders_name.join(orders_price, 'orderkey')
+
+
 toStringList = functions.UserDefinedFunction(lambda names:  ', '.join(names), types.StringType())
 
 def main():
@@ -46,20 +59,8 @@ def main():
               JOIN lineitem l ON (o.orderkey = l.orderkey)
               JOIN part p ON (l.partkey = p.partkey)
               WHERE o.orderkey IN {0}
-              """.format(tuple(orderkeys))).cache()
-    orders_name = orders\
-        .select('orderkey','name')\
-        .groupby("orderkey")\
-        .agg(functions.collect_set("name").alias('name'))
-    # orders_name = orders_name.withColumn('name_s', toStringList(orders['name']))
-    orders_name.show()
-    orders_price = orders\
-        .select('orderkey','totalprice')\
-        .groupby("orderkey")\
-        .agg(functions.sum("totalprice").alias('totalprice'))
-    orders_price.show()
-    orders.unpersist()
-    orders = orders_name.join(orders_price, 'orderkey')
+              """.format(tuple(orderkeys)))
+    orders = agg_orders(orders)
     orders = orders.rdd.map(lambda row: 'Order #{} ${}:{}'.format(row.orderkey, round(row.totalprice, 2), ', '.join(row.name)))
     orders.saveAsTextFile(output)
 
