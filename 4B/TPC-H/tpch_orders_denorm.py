@@ -26,19 +26,16 @@ assert sc.version >= '2.2'  # make sure we have Spark 2.2+
 
 def rdd_for(keyspace, table, split_size=None):
     rdd = sc.cassandraTable(keyspace, table, split_size=split_size, row_format=pyspark_cassandra.RowFormat.DICT) \
+        .select('orderkey', 'totalprice', 'part_names')\
         .where('orderkey IN ?', orderkeys)\
         .setName(table)
     return rdd
 
-def df_for(keyspace, table, split_size=None):
-    sqlContext = SQLContext(sc)
-    df = sqlContext.createDataFrame(sc.cassandraTable(keyspace, table, split_size=split_size).setName(table))
-    df.createOrReplaceTempView(table)
-    return df
-
 def main():
     orders_parts = rdd_for(keyspace, 'orders_parts')
     print(orders_parts.collect())
+    orders_parts = orders_parts.map(lambda row: 'Order #{} ${}:{}'.format(row['orderkey'], round(row['totalprice'], 2), ' '.join(row['part_names'])))
+    orders_parts.saveAsTextFile(output)
 
 if __name__ == "__main__":
     main()

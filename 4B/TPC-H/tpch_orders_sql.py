@@ -35,6 +35,8 @@ def df_for(keyspace, table, split_size=None):
     df.createOrReplaceTempView(table)
     return df
 
+toStringList = functions.UserDefinedFunction(lambda names:  ', '.join(names), types.StringType())
+
 def main():
     orders = df_for(keyspace, 'orders')
     parts = df_for(keyspace, 'part')
@@ -44,8 +46,22 @@ def main():
               JOIN lineitem l ON (o.orderkey = l.orderkey)
               JOIN part p ON (l.partkey = p.partkey)
               WHERE o.orderkey IN {0}
-              """.format(tuple(orderkeys)))
-    orders.show()
+              """.format(tuple(orderkeys))).cache()
+    orders_name = orders\
+        .select('orderkey','name')\
+        .groupby("orderkey")\
+        .agg(functions.collect_set("name").alias('name'))
+    # orders_name = orders_name.withColumn('name_s', toStringList(orders['name']))
+    orders_name.show()
+    orders_price = orders\
+        .select('orderkey','totalprice')\
+        .groupby("orderkey")\
+        .agg(functions.sum("totalprice").alias('totalprice'))
+    orders_price.show()
+    orders.unpersist()
+    orders = orders_name.join(orders_price, 'orderkey')
+    orders = orders.rdd.map(lambda row: 'Order #{} ${}:{}'.format(row.orderkey, round(row.totalprice, 2), ', '.join(row.name)))
+    orders.saveAsTextFile(output)
 
 if __name__ == "__main__":
     main()

@@ -45,7 +45,9 @@ def get_orders_parts(keyspace, split_size=None):
 
 def main():
     orders_parts = get_orders_parts(keyspace)
-    orders_parts.show()
+    # TODO: Do aggregation
+    orders_parts = orders_parts.rdd.map(lambda row: 'Order #{} ${}:{}'.format(row.orderkey, round(row.totalprice, 2), row.name))
+    orders_parts.saveAsTextFile(output)
 
 if __name__ == "__main__":
     main()

@@ -48,6 +48,7 @@ def main():
               JOIN lineitem l ON (o.orderkey = l.orderkey)
               JOIN part p ON (l.partkey = p.partkey)
               """)
+    #TODO: Do aggregation
     order_list = orders.withColumn('part_names', toStringList(orders['name'])).drop('name')
     order_list = order_list.rdd.map(row_to_dict)
     save_rdd_to_cassandra(order_list)
