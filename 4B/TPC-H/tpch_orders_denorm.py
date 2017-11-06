@@ -34,7 +34,7 @@ def rdd_for(keyspace, table, split_size=None):
 def main():
     orders_parts = rdd_for(keyspace, 'orders_parts')
     print(orders_parts.collect())
-    orders_parts = orders_parts.map(lambda row: 'Order #{} ${}:{}'.format(row['orderkey'], round(row['totalprice'], 2), ' '.join(row['part_names'])))
+    orders_parts = orders_parts.map(lambda row: 'Order #{} ${}:{}'.format(row['orderkey'], round(row['totalprice'], 2), ', '.join(row['part_names'])))
     orders_parts.saveAsTextFile(output)
 
 if __name__ == "__main__":

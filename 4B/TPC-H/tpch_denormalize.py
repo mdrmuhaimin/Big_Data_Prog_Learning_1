@@ -44,13 +44,15 @@ def agg_orders(order_rdd):
     orders_name = order_rdd \
         .select('orderkey', 'name') \
         .groupby("orderkey") \
-        .agg(functions.collect_set("name").alias('name'))
+        .agg(functions.collect_set("name").alias('part_names'))
     orders_price = order_rdd \
         .select('orderkey', 'totalprice') \
         .groupby("orderkey") \
         .agg(functions.sum("totalprice").alias('totalprice'))
+    order_rdd = order_rdd.drop('name').drop('totalprice')
+    combined_order_table = orders_name.join(orders_price, 'orderkey').join(order_rdd, 'orderkey')
     order_rdd.unpersist()
-    return orders_name.join(orders_price, 'orderkey')
+    return combined_order_table
 
 def main():
     orders = df_for(input_keyspace, 'orders')
@@ -61,9 +63,9 @@ def main():
               JOIN lineitem l ON (o.orderkey = l.orderkey)
               JOIN part p ON (l.partkey = p.partkey)
               """)
-    #TODO: Do aggregation
-    order_list = orders.withColumn('part_names', toStringList(orders['name'])).drop('name')
-    order_list = order_list.rdd.map(row_to_dict)
+    orders = agg_orders(orders)
+    # order_list = orders.withColumn('part_names', toStringList(orders['name'])).drop('name')
+    order_list = orders.rdd.map(row_to_dict)
     save_rdd_to_cassandra(order_list)
 
 if __name__ == "__main__":
