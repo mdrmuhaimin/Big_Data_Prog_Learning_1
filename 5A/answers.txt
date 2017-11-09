@@ -6,11 +6,11 @@ in that case though it shows replication factor four hadoop shows availability o
 
 How did YARN/MapReduce behave when one of the compute nodes disappeared?
 Ans.
-Firstly it shows appropriate error messages: it commandline it successfully able to tell that one node has been disappeard with the associated nodes ipaddress. Then it also pass the information
-that this node has been marked as failed. In the web frontend it shows an error that it can't find address for the associated executors
+Firstly it shows appropriate error messages: in commandline it successfully able to tell that the node and associated executors has been disappeard (Lost task 45.0 in stage 4.0 (TID 355, hadoop3, executor 3)). Then it also pass the information
+that this node's container which holding the task has been marked as failed. In the web frontend it shows an error that it can't find address for the associated executors.
 
-Error recovery: To make sure the process runs perfectly hadoop distribute the task with other nodes. In my experiment I made node three to fail. It was assigned associated with 16 total task out of which it only able to complete
-eight, so the remaining tasks were distributed amongst the healthy nodes. Here is the breakdown of which executor did how many tasks
+Error recovery: To make sure the process runs perfectly hadoop distribute the task with other available executors. In my experiment I made node three to fail. It was assigned 16 total task out of which it only able to complete
+eight, so the remaining tasks were distributed amongst the healthy executors. Here is the breakdown of which executor did how many tasks
  ----------------------------------------
 |    Name    |  Address   | Success/Fail |
 |----------------------------------------|
