@@ -2,14 +2,13 @@ import sys
 from pyspark import SparkConf
 from cassandra import ConsistencyLevel
 import pyspark_cassandra
-from pyspark_cassandra import Row
 from pyspark.sql import SparkSession, SQLContext, functions, types
 
 input_keyspace = sys.argv[1]
 output_keyspace = sys.argv[2]
 
-cluster_seeds = ['127.0.0.1']
-# cluster_seeds = ['199.60.17.171', '199.60.17.188']
+# cluster_seeds = ['127.0.0.1']
+cluster_seeds = ['199.60.17.171', '199.60.17.188']
 
 conf = SparkConf().setAppName('TPCH') \
         .set('spark.cassandra.connection.host', ','.join(cluster_seeds)) \
@@ -64,7 +63,6 @@ def main():
               JOIN part p ON (l.partkey = p.partkey)
               """)
     orders = agg_orders(orders)
-    # order_list = orders.withColumn('part_names', toStringList(orders['name'])).drop('name')
     order_list = orders.rdd.map(row_to_dict)
     save_rdd_to_cassandra(order_list)
 

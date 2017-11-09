@@ -5,6 +5,8 @@ Ans.
 When we are using filter with Cassandra then we are fetching data from three different table and then joining them using RDD. On the other hand in query denormalized table we are just getting the data
 from  one table without any post processing. However in that case data size would be a bit longer for added order_parts column. Now when we pull a big amounts (lots of rows) of data from the tables then RDD join would
 be an expensive operation and we will see query denormalized table is bit faster. However if we need other columns of part table and we need to access both of the table either way then we can use the cassandra filter option.
+If we need to access the data very frequently and decide to store the data in RDD.cache() then we would like to make sure we are using select statement carefully. Because getting all the data from either table can put pressure
+on our memory based on the size of our memory.
 
 
 
@@ -43,4 +45,4 @@ Deletion:
 4. We will lookup for other reference for partkey from step 2 in our lineitem table with different orderkey.
 5. If for some partkey we don't find any reference with any orderkey then we delete corresponding row from part table as well.
 
-We can follow the above similar scenario when we delete from lineitem and parts table as well. 
+We can follow the above similar scenario when we delete from lineitem and parts table as well.

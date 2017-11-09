@@ -1,9 +1,6 @@
-from cassandra.cluster import Cluster
-from cassandra.query import BatchStatement
-from cassandra import ConsistencyLevel
 from pyspark import SparkConf
 import pyspark_cassandra
-import os, gzip, re, uuid, datetime, sys, math
+import sys, math
 
 keyspace = sys.argv[1]
 table = sys.argv[2]
@@ -14,7 +11,6 @@ cluster_seeds = ['199.60.17.171', '199.60.17.188']
 conf = SparkConf().setAppName('Load Logs Spark') \
         .set('spark.cassandra.connection.host', ','.join(cluster_seeds))
 sc = pyspark_cassandra.CassandraSparkContext(conf=conf)
-# spark = SparkSession.builder.getOrCreate()
 
 def rdd_for(keyspace, table, split_size=None):
     rdd = sc.cassandraTable(keyspace, table, split_size=split_size,
@@ -51,8 +47,6 @@ def calc_r_vars(a, b):
 
 def main():
     nasalogs = rdd_for(keyspace, table)
-    # print('Size of partitions')
-    # print(nasalogs.mapPartitions(lambda it: [sum(1 for _ in it)]).collect())
     host_with_trans_data = nasalogs.map(get_host_with_trans_data).reduceByKey(add_occurance_byte).cache()
     total_host = host_with_trans_data.count()
     (total_host_hit, total_byte) = host_with_trans_data.map(lambda x: x[1]).reduce(add_bytes_and_counts)
@@ -67,6 +61,9 @@ def main():
 
     print('r = {}'.format(r))
     print('r^2 = {}'.format(r * r))
+
+    #Uncomment if you want to write to a file. But in our case we are not writing in a file so I comment the line below
+    #sc.parallelize(['r={}\nr^2={}'.format(r, r * r)]).saveAsTextFile(output)
 
 if __name__ == "__main__":
     main()

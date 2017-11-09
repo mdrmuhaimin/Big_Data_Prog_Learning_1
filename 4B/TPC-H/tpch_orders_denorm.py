@@ -1,19 +1,15 @@
-# from pyspark import SparkConf, SparkContext
 import sys
-# import re
-# import math
 from pyspark import SparkConf
 import pyspark_cassandra
-from pyspark.sql import SparkSession, types, functions
-from pyspark.sql import SQLContext
+from pyspark.sql import SparkSession
 
 
 keyspace = sys.argv[1]
 output = sys.argv[2]
 orderkeys = sys.argv[3:]
 
-cluster_seeds = ['127.0.0.1']
-# cluster_seeds = ['199.60.17.171', '199.60.17.188']
+# cluster_seeds = ['127.0.0.1']
+cluster_seeds = ['199.60.17.171', '199.60.17.188']
 
 conf = SparkConf().setAppName('TPCH') \
         .set('spark.cassandra.connection.host', ','.join(cluster_seeds)) \
@@ -33,7 +29,6 @@ def rdd_for(keyspace, table, split_size=None):
 
 def main():
     orders_parts = rdd_for(keyspace, 'orders_parts')
-    print(orders_parts.collect())
     orders_parts = orders_parts.map(lambda row: 'Order #{} ${}:{}'.format(row['orderkey'], round(row['totalprice'], 2), ', '.join(row['part_names'])))
     orders_parts.saveAsTextFile(output)
 

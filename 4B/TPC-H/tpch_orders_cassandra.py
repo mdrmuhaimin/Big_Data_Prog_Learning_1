@@ -9,8 +9,8 @@ keyspace = sys.argv[1]
 output = sys.argv[2]
 orderkeys = sys.argv[3:]
 
-cluster_seeds = ['127.0.0.1']
-# cluster_seeds = ['199.60.17.171', '199.60.17.188']
+# cluster_seeds = ['127.0.0.1']
+cluster_seeds = ['199.60.17.171', '199.60.17.188']
 
 conf = SparkConf().setAppName('TPCH') \
         .set('spark.cassandra.connection.host', ','.join(cluster_seeds)) \
