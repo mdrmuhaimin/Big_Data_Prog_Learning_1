@@ -1,0 +1,35 @@
+What happened to the HDFS file when one of the nodes it was stored on failed?
+Ans.
+When one node with the replica file stored on failed, initially hadoop shows the files availability only on the three other nodes.
+However eventually hadoop replace the downed node with another node to make it available on four nodes. To test it further I also closed down one extra node to make total alive node only three,
+in that case though it shows replication factor four hadoop shows availability only on three nodes.
+
+How did YARN/MapReduce behave when one of the compute nodes disappeared?
+Ans.
+Firstly it shows appropriate error messages: it commandline it successfully able to tell that one node has been disappeard with the associated nodes ipaddress. Then it also pass the information
+that this node has been marked as failed. In the web frontend it shows an error that it can't find address for the associated executors
+
+Error recovery: To make sure the process runs perfectly hadoop distribute the task with other nodes. In my experiment I made node three to fail. It was assigned associated with 16 total task out of which it only able to complete
+eight, so the remaining tasks were distributed amongst the healthy nodes. Here is the breakdown of which executor did how many tasks
+ ----------------------------------------
+|    Name    |  Address   | Success/Fail |
+|----------------------------------------|
+| Executor 1 | (hadoop 4) |   (20/20)    |
+|----------------------------------------|
+| Executor 2 | (hadoop 5) |   (24/24)    |
+|----------------------------------------|
+| Executor 3 | (hadoop 3) |   (08/16)    |
+|            | (Missing N)|              |
+|----------------------------------------|
+| Executor 4 | (hadoop 2) |   (24/24)    |
+|----------------------------------------|
+| Executor 5 | (hadoop 1) |   (24/24)    |
+ ----------------------------------------
+Total 100 tasks.
+
+
+Were there more things you'd like to try with this cluster, or anything you did try that you think should have been in this assignment?
+Ans.
+It would be intesting if we can get to try how this works in cloud situation. For example instead of a physcial cluster we could put them in AWS and deploy them in across region. One scenario would be really interesting to see if we suddenly stop
+all the instances in one region(by shutting down all instances associated with that zone.) we can observe whethere hadoop transfer those in a separate region and how it affect performance. I remember at the beginning of this year one of the AWS data center in North
+America failed and it disrupt global internet based application as they were deployed in those zone. It would be interesting to see how hadoop handle with that.

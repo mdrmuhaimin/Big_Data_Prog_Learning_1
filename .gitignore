@@ -6,3 +6,4 @@
 **.class
 .gitignore
 correlate_logs/nasa-logs-2/
+TPC-H/spark-warehouse/
