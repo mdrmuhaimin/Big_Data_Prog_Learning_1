@@ -5,7 +5,6 @@ from pyspark.ml.feature import VectorAssembler, StringIndexer, SQLTransformer
 from pyspark.ml import Pipeline
 from pyspark.ml.evaluation import MulticlassClassificationEvaluator
 from pyspark.ml.classification import RandomForestClassifier, MultilayerPerceptronClassifier
-from pyspark.ml.linalg import Vectors
 
 
 
@@ -15,16 +14,12 @@ assert sys.version_info >= (3, 5)  # make sure we have Python 3.5+
 assert spark.version >= '2.2'  # make sure we have Spark 2.2+
 
 
-def main(inputs):
-    #TODO: Remove this comment block
-    # df = spark.createDataFrame([(0.0, Vectors.dense([0.0, 0.0])),
-    #                             (1.0, Vectors.dense([0.0, 1.0])),
-    #                             (1.0, Vectors.dense([1.0, 0.0])),
-    #                             (0.0, Vectors.dense([1.0, 1.0]))], ["label", "features"])
-    # df.show()
+# def dummy(table_name='__THIS__', columns=None):
 
+
+def main(inputs):
     data = spark.read.csv(inputs, header=True, schema=colour_schema)
-    numlabels = data.distinct().count()
+    numlabels = data.select('labelword').distinct().count()
     lab_query = rgb2lab_query(passthrough_columns=['labelword'])
 
     sqlTrans = SQLTransformer(statement=lab_query)
@@ -32,8 +27,8 @@ def main(inputs):
     lab_assembler = VectorAssembler(inputCols=["lL", "lA", "lB"], outputCol="features")
     indexer = StringIndexer(inputCol="labelword", outputCol="color_index", handleInvalid='error')
 
-    rf = RandomForestClassifier(numTrees=3, maxDepth=2, labelCol="color_index", seed=42)
-    mlp = MultilayerPerceptronClassifier(labelCol="color_index", maxIter=100, layers=[3, 10, numlabels])
+    rf = RandomForestClassifier(numTrees=50, maxDepth=30, labelCol="color_index", seed=42)
+    mlp = MultilayerPerceptronClassifier(labelCol="color_index", maxIter=100, layers=[3, 500, 300, numlabels])
 
     models = [
         ('RGB-forest', Pipeline(stages=[rgb_assembler, indexer, rf])),
@@ -45,8 +40,8 @@ def main(inputs):
     evaluator = MulticlassClassificationEvaluator(predictionCol="prediction", labelCol='color_index')
 
 
-    # TODO: split data into training and testing
-    train, test = data.randomSplit([0.9, 0.1])
+    # split data into training and testing
+    train, test = data.randomSplit([0.8, 0.2])
     train = train.cache()
     test = test.cache()
 
@@ -55,11 +50,9 @@ def main(inputs):
         
         # Output a visual representation of the predictions we're
         # making: uncomment when you have a model working
-        # TODO: uncomment it
         plot_predictions(model, label)
 
         predictions = model.transform(test)
-        # predictions.select('features').show()
         # calculate a score
         score = evaluator.evaluate(predictions)
         print(label, score)
