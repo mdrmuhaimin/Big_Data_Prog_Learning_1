@@ -27,8 +27,8 @@ def main(inputs):
     lab_assembler = VectorAssembler(inputCols=["lL", "lA", "lB"], outputCol="features")
     indexer = StringIndexer(inputCol="labelword", outputCol="color_index", handleInvalid='error')
 
-    rf = RandomForestClassifier(numTrees=50, maxDepth=30, labelCol="color_index", seed=42)
-    mlp = MultilayerPerceptronClassifier(labelCol="color_index", maxIter=100, layers=[3, 500, 300, numlabels])
+    rf = RandomForestClassifier(numTrees=25, maxDepth=20, labelCol="color_index", seed=42)
+    mlp = MultilayerPerceptronClassifier(labelCol="color_index", maxIter=100, layers=[3, 250, numlabels])
 
     models = [
         ('RGB-forest', Pipeline(stages=[rgb_assembler, indexer, rf])),

@@ -34,10 +34,10 @@ def main():
 
     agg_sum = lines.groupBy().sum()
 
-    agg_sum = agg_sum.withColumn('beta', ( agg_sum['sum(xy)'] - ( agg_sum['sum(x)'] * agg_sum['sum(y)'] / agg_sum['sum(n)'] ) ) / ( agg_sum['sum(x_sq)'] - ( agg_sum['sum(x)'] * agg_sum['sum(x)'] / agg_sum['sum(n)'] )) )
-    agg_sum = agg_sum.withColumn('alpha', ( (agg_sum['sum(y)'] / agg_sum['sum(n)']) - (agg_sum['sum(x)'] * agg_sum['beta'] / agg_sum['sum(n)']) ))
+    agg_sum = agg_sum.withColumn('Slope (beta)', ( agg_sum['sum(xy)'] - ( agg_sum['sum(x)'] * agg_sum['sum(y)'] / agg_sum['sum(n)'] ) ) / ( agg_sum['sum(x_sq)'] - ( agg_sum['sum(x)'] * agg_sum['sum(x)'] / agg_sum['sum(n)'] )) )
+    agg_sum = agg_sum.withColumn('Intercept (alpha)', ( (agg_sum['sum(y)'] / agg_sum['sum(n)']) - (agg_sum['sum(x)'] * agg_sum['Slope (beta)'] / agg_sum['sum(n)']) ))
 
-    alpha_beta  = agg_sum.select('alpha', 'beta')
+    alpha_beta  = agg_sum.select('Intercept (alpha)', 'Slope (beta)')
 
     messages = alpha_beta\
         .writeStream \
@@ -45,7 +45,7 @@ def main():
         .format("console") \
         .start()
 
-    messages.awaitTermination(60)
+    messages.awaitTermination(600)
 
 if __name__ == "__main__":
     main()

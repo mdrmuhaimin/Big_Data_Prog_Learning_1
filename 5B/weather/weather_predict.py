@@ -88,25 +88,24 @@ def get_best_weather_model(data):
 
     # e.g., use print(LinearRegression().explainParams()) to see what can be tuned
 
-    # estimator_gridbuilders = [
-    #     estimator_gridbuilder(
-    #         LinearRegression(),
-    #         dict(regParam=[.3],         # [0.1, 0.01]
-    #              elasticNetParam=[.8],  # 0-L2, 1-L1
-    #              maxIter=[10]
-    #         )),
-    #
-    #     # TODO: find better estimators
-    #
-    # ]
+    # Because their is not a linear relationship between the features and target class.
+    # That is why using linear regression is not a best option. Ensemble decision tree with surely outperform regular decision tree
+    # so I didn't tested decision tree as well.
+
 
     estimator_gridbuilders = [
         estimator_gridbuilder(
             RandomForestRegressor(),
-            dict()
+            dict(
+                maxDepth=[20],
+                maxBins=[32],
+                numTrees=[25],
+            )
         ),
-
-        # TODO: find better estimators
+        estimator_gridbuilder(
+            GBTRegressor(maxIter=100),
+            dict()
+        )
 
     ]
     metricName = 'r2'
