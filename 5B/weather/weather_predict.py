@@ -87,13 +87,24 @@ def get_best_weather_model(data):
     test = test.cache()
 
     # e.g., use print(LinearRegression().explainParams()) to see what can be tuned
+
+    # estimator_gridbuilders = [
+    #     estimator_gridbuilder(
+    #         LinearRegression(),
+    #         dict(regParam=[.3],         # [0.1, 0.01]
+    #              elasticNetParam=[.8],  # 0-L2, 1-L1
+    #              maxIter=[10]
+    #         )),
+    #
+    #     # TODO: find better estimators
+    #
+    # ]
+
     estimator_gridbuilders = [
         estimator_gridbuilder(
-            LinearRegression(),
-            dict(regParam=[.3],         # [0.1, 0.01]
-                 elasticNetParam=[.8],  # 0-L2, 1-L1
-                 maxIter=[10]
-            )),
+            RandomForestRegressor(),
+            dict()
+        ),
 
         # TODO: find better estimators
 
