@@ -1,0 +1,19 @@
+What is your best guess for the slope and intercept of the streaming points being produced?
+Intercept 23.6 and Slope 14.59
+
+Is your streaming program's estimate of the slope and intercept getting better as the program runs? (That is: is the program aggregating all of the data from the start of time, or only those that have arrived since the last output?)
+Yes the program aggregating all of the data from the start of time, initially intercept varies between 22.5 ~ 23.7 however slope remains 15.57 ~ 14.59 but as more data comes its variation reduce significantly
+
+In the colour classification question, which pipeline gave the best results? What was the score and what parameters did you use to get it?
+The following pipeline yields the best result.
+'LAB-MLP', Pipeline(stages=[sqlTrans, lab_assembler, indexer, mlp]),
+Score: LAB-MLP 0.7008671198142774 Parameters: maxIter=100, layers=[3, 250, 11]
+Here is the overall score for all the other algorithms
+RGB-forest 0.6812831330741141 - numTrees=25, maxDepth=20, seed=42
+LAB-forest 0.6652508743958273 - numTrees=25, maxDepth=20, seed=42
+RGB-MLP 0.6616559421638154 - maxIter=200, layers=[3, 250, 11]
+LAB-MLP 0.7008671198142774 - maxIter=200, layers=[3, 250, 11]
+
+Why is your temperature predictor better than the one in the example? What strategy did you use to find it?
+Because their is not a linear relationship between the features and target class. That is why using linear regression is not a best option.
+So I used a classifier that can predict non linearly separable data, ensemble decision tree, random forest classifier gives us a better result than linear regression.

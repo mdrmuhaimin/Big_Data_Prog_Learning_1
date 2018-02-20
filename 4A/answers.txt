@@ -1,0 +1,33 @@
+1. What happened when you inserted another row with the same primary key as an existing row?
+Ans: It performs an upsert operations. Inserting another record with the same primary key overwrites it.
+
+2. What happened when you query a keyspace with replication factor 1 and one node down?
+How did it behave with replication factor 2 and a node down?
+Ans: When I query a with replication factor 1 and one node down then the query fails. It returned the row when I did it with replication
+factor 2.
+
+3. How did the consistency level affect the results with the node up/down?
+Ans.
+With consistency level all, A write must be written to the commit log and memtable on all replica nodes in the cluster for that partition.
+and for read returns the record after all replicas have responded. The read operation will fail if a replica does not respond.
+On the other hand, with consistency level one, A write must be written to the commit log and memtable of at least one replica node and
+Returns a response from the closest replica, as determined by the snitch. By default, a read repair runs in the background to make the other replicas consistent.
+
+So that means when we have consistency level ALL if a downed node have a replica of a value we are reading then we will not be able to read it. With consistency ONE
+if we be able to read any available replica it should return the query. Same way for writing, while writing if we can satisfy write to all replica nodes then consistency
+one should satisfy other way if due to a downed node we are not able to write to all replicas consistency ONE will throw and error. Same way for consistency level one
+it will satisfy if it can write to atleast one node.
+
+4. Which of the WHERE id=? values returned successfully with CONSISTENCY ALL
+when one of the nodes was down? Why do you think some could be returned but not others?
+Ans. With the above query I got id 1 and 3 returned and id 2 and 4 not returned. The reason 1 and 3 returned all the nodes that have replicas of 1 and 3
+were available. However with 2 and 4 replicas of 2 and 4 are stored are in the downed node so it can't satisfy consistency ALL thus returned error.
+
+5. What primary key did you choose for the NASA logs table? Why?
+Ans. I would add an UUID to each of my row and choose UUID as my primary key, it makes our code simpler by avoiding complexity of using a compund key
+and at the same time give an unique attribute to our data transferred to any host for a numbers of request in given time. However for assignment 4B
+when we have to aggregate data by host then we should use a primary key as a compound key combination of host and uuid. Where host can be first element
+of our tuple and uuid can be second element.
+
+6. What was the CQL query you used (or tried) to get the total number of bytes?
+Ans. SELECT SUM(bytes) FROM nasalogs;

@@ -5,7 +5,7 @@ import sys
 import re
 import math
 
-inputs = "nasa-logs-1"
+inputs = "nasa-logs-1_back"
 output = "out-1"
 
 spark = SparkSession.builder.appName('ingest_logs').getOrCreate()

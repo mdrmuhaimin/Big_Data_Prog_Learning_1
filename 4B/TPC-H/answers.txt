@@ -1,0 +1,48 @@
+1. Your “filter with Cassandra” and “query denormalized table” solutions were both likely fast enough that you couldn't distinguish between them.
+Under what circumstances do you think one would be noticeably faster than the other, or for what other reasons would choose one over the other? What kinds of queries/frequency would make either one better?
+
+Ans.
+When we are using filter with Cassandra then we are fetching data from three different table and then joining them using RDD. On the other hand in query denormalized table we are just getting the data
+from  one table without any post processing. However in that case data size would be a bit longer for added order_parts column. Now when we pull a big amounts (lots of rows) of data from the tables then RDD join would
+be an expensive operation and we will see query denormalized table is bit faster. However if we need other columns of part table and we need to access both of the table either way then we can use the cassandra filter option.
+If we need to access the data very frequently and decide to store the data in RDD.cache() then we would like to make sure we are using select statement carefully. Because getting all the data from either table can put pressure
+on our memory based on the size of our memory.
+
+
+
+2. The “join in Spark SQL” solution was certainly slower. Are there situations where that would be the best choice, over one of the ones that were faster here?
+
+Ans.
+"Join in SPARK SQL" would be the best choice when we have both
+- All the rows from all three tables because in that case doing the SPARK SQL method it will not be computationally slower than any other.
+- Our memory is big enough to be unaffected by storing the Spark SQL RDD/dataframe cachce. In that case we will have the advantage of using RDD/dataframe api, and also we will have faster i/o as RDD/dataframe is stored in memory.
+- Lastly our denormalize table will need more storage memory and it might not be cost effective, so using Join in SPARK SQL can be an economic choice as well.
+
+
+3. Consider the logic that you would have to implement to maintain the denormalized data (assuming that the orders table had the part_names query in the main data set).
+Write a few sentences on what you'd have to do when inserting/updating/deleting data in this case.
+
+Ans.
+We will be assuiming each entry in order table will have some part referenced from part table linked through lineitem table. Also update, insert and delete operation will happen in denormalized order table and we will update the other two table accordingly.
+Here will be the different scenarios
+
+When inserting: When insert one entry two order table we need to insert one or multiple entry to part table with the list of partsets we receive. And we need to create entry on lineitem table with the reference from newly created
+partkey and orderkey. Similarly if insertion happen in lineitem and part table this needed to be reflected in order table as well.
+
+When updating: If we update any column other than part_names column in order key then we can do it without affecting the other table. If we update the part name column
+firtst we need to check if the corresponding parts exist or not in the parts table.
+If it not exist we need to enter the names of the parts in the part table and reference them in line table similar to what we did during insertion. After wards we need to update corresponding partkey and orderkey in lineitem table.
+If the parts we want to update exist in the part table then we need to update the lineitem table with update partkey and orderkey. Also if we update either of part or lineitem table we need to propagate the change to other two tables as well.
+
+When deleting: For deletion operation whether to actually delete or not can be chosen based on either of two scenarios
+Scenario 1: We will not allow user to delete unless user explicitly mention that deletion will break the link with existing row from part item table. In that case we will raise an error message explaining the issue.
+Scenario 2: We will assume that user is aware of the consequence deletion will affect the associated table as well. And we go ahead with the deletion.
+
+Deletion:
+1. First keep track of the orderkey of row that needed to be deleted and delete the row from the order table.
+2. Then we keep track of all the partkey associated with our orderkey from lineitem table.
+3. In the next step we will delete all the rows from line item table associated with our orderkey.
+4. We will lookup for other reference for partkey from step 2 in our lineitem table with different orderkey.
+5. If for some partkey we don't find any reference with any orderkey then we delete corresponding row from part table as well.
+
+We can follow the above similar scenario when we delete from lineitem and parts table as well.

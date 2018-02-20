@@ -53,6 +53,8 @@ total_host = host_with_trans_data.count()
 x_avg = total_host_hit / total_host
 y_avg = total_byte / total_host
 
+print(x_avg, y_avg, total_host)
+
 correlation_coefficient_variables_list = host_with_trans_data.map(lambda x: calc_r_vars_list(x[1][0], x[1][1], x_avg, y_avg))
 correlation_coefficient_variables = correlation_coefficient_variables_list.reduce(calc_r_vars)
 r = correlation_coefficient_variables[0] / math.sqrt(correlation_coefficient_variables[1] * correlation_coefficient_variables[2])
